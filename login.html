@@ -1,1 +1,53 @@
-<!-- login.html content goes here -->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>تسجيل الدخول</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; background: #f4f4f4; }
+        .card { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 300px; }
+        input, button { width: 100%; padding: 0.5rem; margin-top: 1rem; }
+        .error { color: red; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2 style="text-align:center;">تسجيل الدخول</h2>
+        <input type="text" id="username" placeholder="الاسم">
+        <input type="password" id="password" placeholder="الرقم السري">
+        <button onclick="login()">دخول</button>
+        <div class="error" id="errorMsg"></div>
+    </div>
+
+    <script>
+        async function login() {
+            const name = document.getElementById('username').value.trim();
+            const pin = document.getElementById('password').value.trim();
+            const errorBox = document.getElementById('errorMsg');
+
+            errorBox.textContent = "";
+
+            try {
+                const response = await fetch("https://hsaye.sharepoint.com/sites/RESTAURANTS_Mang/_api/web/lists/getbytitle('المستخدمين')/items?$filter=الاسم eq '" + name + "' and الرقم_السري eq '" + pin + "' and مفعل eq 1", {
+                    headers: { 'Accept': 'application/json;odata=verbose' },
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+                const user = data.d.results[0];
+
+                if (user) {
+                    sessionStorage.setItem("loggedInUser", JSON.stringify(user));
+                    window.location.href = "pos.html";
+                } else {
+                    errorBox.textContent = "البيانات غير صحيحة أو الحساب غير مفعل.";
+                }
+
+            } catch (err) {
+                errorBox.textContent = "حدث خطأ أثناء محاولة تسجيل الدخول.";
+                console.error(err);
+            }
+        }
+    </script>
+</body>
+</html>
